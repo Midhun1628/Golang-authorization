@@ -1,54 +1,31 @@
-package utils
+package services
 
 import (
-	"fmt"
-	
 	"os"
 	"time"
+"github.com/golang-jwt/jwt/v5"	
 
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/joho/godotenv"
 )
-var jwtSecretKey []byte
 
-func init(){
-	godotenv.Load()
-	jwtSecretKey=[]byte(os.Getenv("JWT_SECRET"))
-}
-
- 
-
-type Claims struct {
-	Username string `json:"username"`
-	Role     string `json:"role"`
-	jwt.RegisteredClaims
-}
-
-// Generate JWT token
-func GenerateToken(username, role string) (string, error) {
-	claims := Claims{
-		Username: username,
-		Role:     role,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 30)),
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(jwtSecretKey)
-}
-
-// Validate JWT token
-func ValidateToken(tokenString string) (*Claims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return jwtSecretKey, nil
+// GenerateJWT generates a new token for a given username and role
+func GenerateJWT(username string, role string) (string, error) {
+	secretKey := os.Getenv("SECRET_KEY")
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"username": username,
+		"role":     role,
+		"exp":      time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
 	})
-	if err != nil {
-		return nil, err
-	}
-	claims, ok := token.Claims.(*Claims)
-	if !ok || !token.Valid {
-		return nil, fmt.Errorf("invalid token")
-	}
-	return claims, nil
+
+	return token.SignedString([]byte(secretKey))
+}
+
+// ValidateJWT verifies the given token
+func ValidateJWT(tokenString string) (*jwt.Token, error) {
+	secretKey := os.Getenv("SECRET_KEY")
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secretKey), nil
+	})
+
+	return token, err
 }
