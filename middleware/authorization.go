@@ -4,10 +4,11 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"	
+	"github.com/golang-jwt/jwt/v5"
 )
 
-func RoleMiddleware(allowedRoles ...string) gin.HandlerFunc {
+// Check if user has the required permission
+func PermissionMiddleware(requiredPermission string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		claims, exists := c.Get("user")
 		if !exists {
@@ -16,9 +17,16 @@ func RoleMiddleware(allowedRoles ...string) gin.HandlerFunc {
 			return
 		}
 
-		userRole := claims.(jwt.MapClaims)["role"].(string)
-		for _, role := range allowedRoles {
-			if userRole == role {
+		userClaims := claims.(*jwt.MapClaims)
+		userPermissions, ok := (*userClaims)["permissions"].([]interface{})
+		if !ok {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Invalid permissions"})
+			c.Abort()
+			return
+		}
+
+		for _, perm := range userPermissions {
+			if perm.(string) == requiredPermission {
 				c.Next()
 				return
 			}

@@ -1,3 +1,4 @@
+
 package config
 
 import (
@@ -8,6 +9,8 @@ import (
 	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+
+	"Golang-authorization/models" 
 )
 
 var DB *gorm.DB
@@ -26,4 +29,8 @@ func ConnectDatabase() {
 
 	DB = database
 	fmt.Println("Database connected successfully!")
+
+	// Correcting the variable name
+	DB.AutoMigrate(&models.Role{}, &models.Permission{}, &models.RolePermission{}, &models.User{})
+	fmt.Println("Database Migrated Successfully!")
 }

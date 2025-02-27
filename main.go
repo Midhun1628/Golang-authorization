@@ -1,19 +1,17 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"Golang-authorization/config"
-	"Golang-authorization/middleware"
 	"Golang-authorization/routes"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	config.ConnectDatabase()
-	r := gin.Default()
 
-	// Apply middleware globally
-	r.Use(middleware.AuthMiddleware())
 
-	routes.SetupRoutes(r)
-	r.Run(":8080")
+	router := gin.Default()
+	routes.SetupRoutes(router)
+	router.Run(":8080")
 }
