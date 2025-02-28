@@ -53,12 +53,12 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-fmt.Println("userDetails:",user.ID)
+fmt.Println("userDetails:",user.Username)
 
 	// Generate JWT
 	token, err := utils.GenerateToken( user.ID)
 
-fmt.Println("Generated Token:",err)
+fmt.Println("Generated Token:",token)
 
 
 	if err != nil {
@@ -69,10 +69,10 @@ fmt.Println("Generated Token:",err)
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
 
-func getRoleName(roleID uint) string {
-	var role models.Role
-	if err := config.DB.Where("roll_no = ?", roleID).First(&role).Error; err != nil {
-		return "Unknown"
-	}
-	return role.EmployeePosition
-}
+// func getRoleName(roleID uint) string {
+// 	var role models.Role
+// 	if err := config.DB.Where("roll_no = ?", roleID).First(&role).Error; err != nil {
+// 		return "Unknown"
+// 	}
+// 	return role.EmployeePosition
+// }

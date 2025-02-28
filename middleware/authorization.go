@@ -18,7 +18,7 @@ func PermissionMiddleware(requiredPermission string) gin.HandlerFunc {
 		}
 
 		userClaims := claims.(*jwt.MapClaims)
-		userPermissions, ok := (*userClaims)["permissions"].([]interface{})
+		userPermissions, ok := (*userClaims)["permissions"].([]any)
 		if !ok {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Invalid permissions"})
 			c.Abort()

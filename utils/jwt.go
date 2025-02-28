@@ -1,19 +1,18 @@
 package utils
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"time"
-	"errors"
 
 	"github.com/golang-jwt/jwt/v5"
-	
 )
 
 // Custom claims struct
 type Claims struct {
 	Username    string   `json:"username"`
-	Role        string   `json:"role"`
-	Permissions []string `json:"permissions"`
+
 	jwt.RegisteredClaims
 }
 
@@ -36,20 +35,20 @@ func GenerateToken(userID uint) (string, error) {
 
 // ValidateJWT verifies the given token
 func ValidateJWT(tokenString string) (*Claims, error) {
-	secretKey := os.Getenv("SECRET_KEY")
-	if secretKey == "" {
-		return nil, errors.New("missing secret key")
-	}
-
-	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (any, error) {
 		return []byte(secretKey), nil
 	})
+
+	fmt.Println("token from validate func :", token)
 
 	if err != nil {
 		return nil, err
 	}
 
 	claims, ok := token.Claims.(*Claims)
+
+fmt.Println("claims from validate func:", claims)
+
 	if !ok || !token.Valid {
 		return nil, errors.New("invalid token")
 	}
