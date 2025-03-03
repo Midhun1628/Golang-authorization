@@ -2,7 +2,6 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"time"
 
@@ -22,36 +21,32 @@ type Claims struct {
 
 var secretKey = []byte(os.Getenv("SECRET_KEY"))
 
-func GenerateToken(userID uint) (string, error) {
-    expirationTime := time.Now().Add(1 * time.Minute)
-    claims := &jwt.MapClaims{
-        "user_id": userID,
-        "exp":     expirationTime.Unix(),
-    }
-    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-    return token.SignedString(secretKey)
+func GenerateToken(userID uint, role string) (string, error) {
+	expirationTime := time.Now().Add(4 * time.Minute) // Token expires in 2 minutes
+
+	claims := jwt.MapClaims{
+		"user_id": userID,
+		"role":    role, // Include role in token
+		"exp":     expirationTime.Unix(),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(secretKey)
 }
 
 
+
 // ValidateJWT verifies the given token
-func ValidateJWT(tokenString string) (*Claims, error) {
-token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (any, error) {
-		return []byte(secretKey), nil
+func ValidateJWT(tokenString string) (jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			return secretKey, nil
 	})
-
-	fmt.Println("token from validate func :", token)
-
-	if err != nil {
-		return nil, err
+	if err != nil || !token.Valid {
+			return nil, errors.New("invalid token")
 	}
-
-	claims, ok := token.Claims.(*Claims)
-
-fmt.Println("claims from validate func:", claims)
-
-	if !ok || !token.Valid {
-		return nil, errors.New("invalid token")
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+			return nil, errors.New("invalid token claims")
 	}
-
 	return claims, nil
 }

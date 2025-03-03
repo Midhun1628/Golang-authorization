@@ -22,7 +22,7 @@ func AuthMiddleware() gin.HandlerFunc {
 fmt.Println("parts from authMiddleware:", parts)
 
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format msg from authMiddleware"})
 			c.Abort()
 			return
 		}
@@ -32,11 +32,12 @@ fmt.Println("parts from authMiddleware:", parts)
 
 		claims, err := utils.ValidateJWT(tokenString)
 		if err != nil {
-			fmt.Println("JWT validation error:", err) // Debugging
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
-			c.Abort()
-			return
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+				c.Abort()
+				return
 		}
+		c.Set("user", claims)
+		
 
 		// Store user data in context
 		c.Set("user", claims)
