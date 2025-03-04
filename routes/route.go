@@ -10,6 +10,7 @@ import (
 
 func SetupRoutes(router *gin.Engine) {
 	router.POST("/login", controllers.LoginUser)
+	router.POST("/refresh",controllers.RefreshToken)
 	
 	protected := router.Group("/")
 	protected.Use(middleware.AuthMiddleware())

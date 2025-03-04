@@ -9,7 +9,62 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+func CreateUser(c *gin.Context) {
+	// Extract user claims from context
+	claims, exists := c.Get("user")
 
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Token missing or invalid msg from update func"})
+		c.Abort()
+		return
+	}
+
+	// Correct type assertion
+	userClaims, ok := claims.(jwt.MapClaims)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
+		c.Abort()
+		return
+	}
+
+	// Get user role from token
+	userRole, ok := userClaims["role"].(string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid role in token"})
+		c.Abort()
+		return
+	}
+
+	// Only allow "SuperAdmin" to create users
+	if userRole == "Admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Not Authorized for Admin. Only SuperAdmin can create users."})
+		c.Abort()
+		return
+	}
+
+	if userRole == "FrontOffice" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Not Authorized for FrontOffice. Only SuperAdmin can create users."})
+		c.Abort()
+		return
+	}
+
+	var user models.User
+
+	// Bind JSON request body to the user struct
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request", "details": err.Error()})
+		return
+	}
+
+	// Create user in the database
+	if err := config.DB.Create(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create user"})
+		return
+	}
+
+	// Send success response
+	c.JSON(http.StatusCreated, gin.H{"message": "User created successfully", "user": user})
+}
 
 func GetUsers(c *gin.Context) {
 	var users []models.User
@@ -57,7 +112,7 @@ func UpdateUser(c *gin.Context) {
 
 	// Only allow "Super Admin" and "Admin" to update users
 	if userRole != "SuperAdmin" && userRole != "Admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Not Authorized"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "Not Authorized for Front Office"})
 		c.Abort()
 		return
 	}
@@ -119,8 +174,14 @@ func DeleteUser(c *gin.Context) {
 	}
 
 	// Only allow "SuperAdmin" to delete users
-	if userRole != "SuperAdmin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Not Authorized. Only SuperAdmin can delete users."})
+	if userRole == "Admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Not Authorized for Admin. Only SuperAdmin can delete users."})
+		c.Abort()
+		return
+	}
+
+	if userRole == "FrontOffice" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Not Authorized for FrontOffice. Only SuperAdmin can delete users."})
 		c.Abort()
 		return
 	}
@@ -145,53 +206,3 @@ func DeleteUser(c *gin.Context) {
 }
 
 
-func CreateUser(c *gin.Context) {
-	// Extract user claims from context
-	claims, exists := c.Get("user")
-
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Token missing or invalid msg from update func"})
-		c.Abort()
-		return
-	}
-
-	// Correct type assertion
-	userClaims, ok := claims.(jwt.MapClaims)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
-		c.Abort()
-		return
-	}
-
-	// Get user role from token
-	userRole, ok := userClaims["role"].(string)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid role in token"})
-		c.Abort()
-		return
-	}
-
-	// Only allow "SuperAdmin" to create users
-	if userRole != "SuperAdmin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Not Authorized. Only SuperAdmin can create users."})
-		c.Abort()
-		return
-	}
-
-	var user models.User
-
-	// Bind JSON request body to the user struct
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request", "details": err.Error()})
-		return
-	}
-
-	// Create user in the database
-	if err := config.DB.Create(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create user"})
-		return
-	}
-
-	// Send success response
-	c.JSON(http.StatusCreated, gin.H{"message": "User created successfully", "user": user})
-}

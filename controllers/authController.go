@@ -11,6 +11,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type LoginResponse struct {
+    Username  string `json:"Username"`
+    JobTitle  string `json:"job_title"`
+    RefreshToken     string `json:"refresh_token"`
+    AccessToken     string `json:"acess_token"`
+
+}
 
 
 func LoginUser(c *gin.Context) {
@@ -18,6 +25,8 @@ func LoginUser(c *gin.Context) {
 		Email    string `json:"email" binding:"required"`
 		Password string `json:"password" binding:"required"`
 	}
+
+	
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -27,24 +36,71 @@ func LoginUser(c *gin.Context) {
 	// Find user by email
 	var user models.User
 	if err := config.DB.Preload("Role").Where("email = ?", input.Email).First(&user).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email id "})
 		return
 	}
 
 	// Compare password directly (Note: Hash passwords in production)
 	if user.Password != input.Password {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Password is incorrect"})
 		return
 	}
 
 	// Generate JWT with role
-	token, err := utils.GenerateToken(user.ID, user.Role.EmployeePosition) // Pass role here
+	accessToken , refreshToken, err := utils.GenerateToken(user.ID, user.Role.EmployeePosition) // Pass role here
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	c.SetCookie("refresh_token",refreshToken,7*24*60*60,"/","",false ,true)
+
+c.JSON(http.StatusOK, LoginResponse{
+    Username: user.Username,
+    AccessToken: accessToken,
+    JobTitle: user.Role.EmployeePosition,
+	RefreshToken: refreshToken,
+})
+}
+
+func RefreshToken(c *gin.Context) {
+
+	refreshToken ,err := c.Cookie("refresh_token")
+
+	if err !=nil{
+		c.JSON(http.StatusUnauthorized,gin.H{"error":"No refresh token is stored in cookies"})
+		return
+	}
+// validating refresh token
+	claims,err :=utils.ValidateRefreshToken(refreshToken)
+
+	if err !=nil{
+		c.JSON(http.StatusUnauthorized,gin.H{"error" : "Invalid refresh token to Validate"})
+	}
+//extracting user ID
+	userID,ok := claims["user_id"].(float64)
+
+	if ! ok{
+		c.JSON(http.StatusUnauthorized,gin.H{"error":"Invalid token claims from refresh token"})
+		return
+	}
+
+	var user models.User
+
+	if err :=config.DB.Preload("Role").Where("id= ?",uint(userID)).First(&user).Error;
+
+	err !=nil{
+		c.JSON(http.StatusUnauthorized,gin.H{"error":"User not found"})
+		return
+	}
+
+	acesssToken, _ ,err :=utils.GenerateToken(user.ID,user.Role.EmployeePosition)
+
+	if err!=nil{
+		c.JSON(http.StatusInternalServerError,gin.H{"error":"Could  not generate a new token"})
+	}
+
+	c.JSON(http.StatusOK,gin.H {"new Access Token": acesssToken})
 }
 
 

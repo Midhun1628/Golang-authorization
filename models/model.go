@@ -1,7 +1,5 @@
 package models
 
-
-
 type User struct {
     ID       uint   `gorm:"primaryKey"`
     Username string `gorm:"size:100;not null"`
@@ -26,5 +24,4 @@ type RolePermission struct {
     ID           uint `gorm:"primaryKey"`
     RoleID       uint
     PermissionID uint
-
 }
