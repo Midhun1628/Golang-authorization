@@ -4,7 +4,7 @@ import (
 	"Golang-authorization/config"
 	"Golang-authorization/models"
 	"Golang-authorization/utils"
-	
+	"fmt"
 
 	"net/http"
 
@@ -40,22 +40,25 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	// Compare password directly (Note: Hash passwords in production)
+	
 	if user.Password != input.Password {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Password is incorrect"})
 		return
 	}
 
 	// Generate JWT with role
-	accessToken , refreshToken, err := utils.GenerateToken(user.ID, user.Role.EmployeePosition) // Pass role here
+	accessToken , refreshToken, err := utils.GenerateToken(user.ID, user.Role.EmployeePosition) 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 		return
 	}
 
+	user.RefreshToken=refreshToken
+	config.DB.Save(&user)
+
 	c.SetCookie("refresh_token",refreshToken,7*24*60*60,"/","",false ,true)
 
-c.JSON(http.StatusOK, LoginResponse{
+    c.JSON(http.StatusOK, LoginResponse{
     Username: user.Username,
     AccessToken: accessToken,
     JobTitle: user.Role.EmployeePosition,
@@ -93,12 +96,23 @@ func RefreshToken(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized,gin.H{"error":"User not found"})
 		return
 	}
+fmt.Println("refresh token stored :",user.RefreshToken)
+	// Check if the refresh token matches the stored token
+	if user.RefreshToken != refreshToken {
+		c.JSON(http.StatusUnauthorized, gin.H{"stored token":user.RefreshToken})
+		return
+	}
 
-	acesssToken, _ ,err :=utils.GenerateToken(user.ID,user.Role.EmployeePosition)
+	acesssToken, newRefreshToken ,err :=utils.GenerateToken(user.ID,user.Role.EmployeePosition)
 
 	if err!=nil{
 		c.JSON(http.StatusInternalServerError,gin.H{"error":"Could  not generate a new token"})
 	}
+
+	user.RefreshToken=newRefreshToken
+	config.DB.Save(&user)
+
+	c.SetCookie("refresh_token",newRefreshToken,7*24*60*60,"/","",false ,true)
 
 	c.JSON(http.StatusOK,gin.H {"new Access Token": acesssToken})
 }

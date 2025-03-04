@@ -27,10 +27,10 @@ func ConnectDatabase() {
 		log.Fatal("Failed to connect to database: ", err)
 	}
 
-	DB = database
 	fmt.Println("Database connected successfully!")
-
+	
 	// Correcting the variable name
 	DB.AutoMigrate(&models.Role{}, &models.Permission{}, &models.RolePermission{}, &models.User{})
 	fmt.Println("Database Migrated Successfully!")
+	DB = database
 }

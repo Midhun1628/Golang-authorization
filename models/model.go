@@ -1,12 +1,14 @@
 package models
 
 type User struct {
+    gorm.Model
     ID       uint   `gorm:"primaryKey"`
     Username string `gorm:"size:100;not null"`
     Email    string `gorm:"size:100;unique;not null"`
     Password string `gorm:"size:255;not null"`
     RollID   uint   `gorm:"not null"`
     Role Role `gorm:"foreignKey:RollID"`
+    RefreshToken   string `json:"refresh_token"`
 }
 
 type Role struct {
