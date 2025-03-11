@@ -1,7 +1,9 @@
 package models
 
+
+
 type User struct {
-    gorm.Model
+   
     ID       uint   `gorm:"primaryKey"`
     Username string `gorm:"size:100;not null"`
     Email    string `gorm:"size:100;unique;not null"`

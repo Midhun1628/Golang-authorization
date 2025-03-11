@@ -1,6 +1,6 @@
 import { createApp } from "vue";
 import App from "./App.vue";
-import router from "./router"; // If using Vue Router
+import router from "./routers/router"; // If using Vue Router
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap";
 import axios from "axios";
