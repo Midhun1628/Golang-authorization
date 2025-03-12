@@ -81,9 +81,20 @@ func GetUsers(c *gin.Context) {
 		return
 	}
 
+	var userResponses []map[string]interface{}
+	for _, user := range users {
+		userResponses = append(userResponses, map[string]interface{}{
+			"user_id":  user.ID,                      // Rename 'id' to 'user_id'
+			"username": user.Username,
+			"email":    user.Email,
+			"position": user.Role.EmployeePosition,  // Rename 'role' to 'position'
+		})
+	}
+
 	// Successfully retrieved users
-	c.JSON(http.StatusOK, users)
+	c.JSON(http.StatusOK, userResponses) // Send formatted response
 }
+
 
 func UpdateUser(c *gin.Context) {
 	// Extract user claims from context

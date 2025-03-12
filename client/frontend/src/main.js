@@ -2,6 +2,8 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import router from "./routers/router"; // If using Vue Router
 import "bootstrap/dist/css/bootstrap.min.css";
+import "@fortawesome/fontawesome-free/css/all.css";
+
 import "bootstrap";
 import axios from "axios";
 import VueCookies from "vue-cookies";

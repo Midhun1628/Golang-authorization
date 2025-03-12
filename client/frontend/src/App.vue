@@ -2,9 +2,12 @@
   <div id="app">
     <Navbar v-if="isLoggedIn" :currentMenu="selectedMenu" />
     <Sidebar v-if="isLoggedIn" @update-navbar="selectedMenu = $event" />
-    <router-view></router-view>
-    <Footer v-if="isLoggedIn">
-      </Footer>
+    
+    <main :class="{ 'with-sidebar': isLoggedIn }">
+      <router-view></router-view> <!-- Dynamically load the content here -->
+    </main>
+
+    <Footer v-if="isLoggedIn"></Footer>
   </div>
 </template>
 
@@ -12,14 +15,13 @@
 import Navbar from "./components/Navbar.vue";
 import Sidebar from "./components/Sidebar.vue";
 import Footer from "./components/Footer.vue";
-import Login from "./components/Login.vue";
+import "@fortawesome/fontawesome-free/css/all.css";
 
 export default {
   components: {
     Navbar,
     Sidebar,
     Footer,
-    Login,
   },
   data() {
     return {
@@ -33,3 +35,16 @@ export default {
   },
 };
 </script>
+
+<style>
+/* Default style when sidebar is hidden */
+main {
+  padding: 20px;
+  margin-left: 0; /* No margin when sidebar is hidden */
+}
+
+/* Apply left margin only when the user is logged in */
+main.with-sidebar {
+  margin-left: 250px; /* Adjust based on sidebar width */
+}
+</style>

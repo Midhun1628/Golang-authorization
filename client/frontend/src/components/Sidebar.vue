@@ -8,15 +8,14 @@
     <div class="sidebar">
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column">
-          <!-- Dashboard Menu -->
-          <SidebarItem name="Dashboard" icon="fas fa-bars" @update-navbar="updateNavbarText" />
+          <!-- Dashboard -->
+          <SidebarItem name="Dashboard" icon="fas fa-bars" path="/dashboard" @update-navbar="updateNavbarText" />
 
-          <!-- Manage Users Menu -->
-          <SidebarItem name="Manage Users" icon="fas fa-user" @update-navbar="updateNavbarText" />
-          <SidebarItem name="Logout"  icon="fas fa-sign-out-alt" @update-navbar="updateNavbarText"  />
-          <SidebarItem name="klogjn"  icon="fas fa-sign-out-alt" @update-navbar="updateNavbarText"  />
+          <!-- User Table -->
+          <SidebarItem name="User Table" icon="fas fa-user" path="/user-table" @update-navbar="updateNavbarText" />
 
-
+          <!-- Logout -->
+          <SidebarItem name="Logout" icon="fas fa-sign-out-alt" path="/logout" @update-navbar="updateNavbarText" />
         </ul>
       </nav>
     </div>
@@ -37,7 +36,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-/* Custom styles if needed */
-</style>

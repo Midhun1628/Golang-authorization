@@ -1,27 +1,32 @@
 <template>
-    <li class="nav-item">
-      <a href="#" class="nav-link" @click="updateNavbar">
-        <i class="nav-icon" :class="icon"></i>
-        <p>{{ name }}</p>
-      </a>
-    </li>
-  </template>
-  
-  <script>
-  export default {
-    props: {
-      name: String,  // Menu name (Dashboard, Manage Users)
-      icon: String,  // FontAwesome icon class
+  <li class="nav-item">
+    <router-link :to="path" class="nav-link" @click="updateNavbar">
+      <i class="nav-icon" :class="icon"></i>
+      <p>{{ name }}</p>
+    </router-link>
+  </li>
+</template>
+
+<script>
+export default {
+  props: {
+    name: String,  // Menu name (Dashboard, User Table, Logout)
+    icon: String,  // FontAwesome icon class
+    path: String,  // Path for navigation
+  },
+  methods: {
+    updateNavbar() {
+      this.$emit("update-navbar", this.name); // Emit event to update the Navbar title
     },
-    methods: {
-      updateNavbar() {
-        this.$emit("update-navbar", this.name); // Emit event to parent here passing the data from child to parent (Sidebar.vue)
-      },
-    },
-  };
-  </script>
-  
-  <style scoped>
-  /* Custom styles if needed */
-  </style>
-  
+  },
+};
+</script>
+
+<style scoped>
+/* Highlight active menu */
+.router-link-active {
+  background: #007bff;
+  color: white;
+  border-radius: 5px;
+}
+</style>

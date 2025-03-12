@@ -1,22 +1,31 @@
 <!-- src/components/Dashboard.vue -->
 <template>
-    <div>
-      <h1>Welcome back, user!</h1>
-    </div>
-  </template>
-  
-  <script>
-  export default {
-    name: "Dashboard",
-  };
-  </script>
-  
-  <style scoped>
-  h1 {
-    text-align: center;
-    background: #000;
-    margin-top: 20px;
-    color: #333;
-  }
-  </style>
-  
+  <div>
+    <h1>Welcome back, {{ name }}!</h1>
+  </div>
+</template>
+
+<script>
+import { ref, onMounted } from "vue";
+
+export default {
+  name: "Dashboard",
+  setup() {
+    const name = ref(""); // Reactive variable
+
+    onMounted(() => {
+      name.value = localStorage.getItem("username") || "Guest"; // Default value if null
+    });
+
+    return { name };
+  },
+};
+</script>
+
+<style scoped>
+h1 {
+  text-align: center;
+  margin-top: 20px;
+  color: #333;
+}
+</style>

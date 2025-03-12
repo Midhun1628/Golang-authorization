@@ -20,18 +20,21 @@ const routes = [
       }
     },
   },
-  // {
-  //   path: "/manage-user",
-  //   name: "UserTable",
-  //   component: UserTable,
-  // },{
-  //   path: "/logout",
-  //   name: "Logout",
-  //   beforeEnter: (to, from, next) => {
-  //     localStorage.removeItem("access_token"); // Clear token on logout
-  //     next("/login"); // Redirect to login page
-  //   },
-  // },
+  {
+    path: "/user-table",
+    name: "UserTable",
+    component: UserTable,
+  },{
+    path: "/logout",
+    name: "Logout",
+    beforeEnter: (to, from, next) => {
+      localStorage.removeItem("access_token");    // Clear token on logout
+      localStorage.removeItem("job_title");
+      localStorage.removeItem("username");
+   
+      next("/"); // Redirect to login page
+    },
+  },
 ];
 
 const router = createRouter({

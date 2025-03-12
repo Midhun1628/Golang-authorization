@@ -3,8 +3,8 @@ import { ref } from "vue";
 import api from "/axios"; // Use the new API instance
 import { useRouter } from "vue-router";
 
-const email = ref("");
-const password = ref("");
+const email = ref("john@gmail.com");
+const password = ref("pass");
 const errorMessage = ref("");
 const router = useRouter();
 
@@ -35,7 +35,7 @@ const login = async () => {
       <form @submit.prevent="login">
         <div class="input-group">
           <label>Email:</label>
-          <input v-model="email" type="email" required placeholder="Enter your email" />
+          <input v-model="email" type="email" required placeholder="Enter your email"  />
         </div>
         <div class="input-group">
           <label>Password:</label>
