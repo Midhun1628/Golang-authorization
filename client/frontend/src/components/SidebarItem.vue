@@ -1,12 +1,3 @@
-<template>
-  <li class="nav-item">
-    <router-link :to="path" class="nav-link" @click="updateNavbar">
-      <i class="nav-icon" :class="icon"></i>
-      <p>{{ name }}</p>
-    </router-link>
-  </li>
-</template>
-
 <script>
 export default {
   props: {
@@ -16,11 +7,22 @@ export default {
   },
   methods: {
     updateNavbar() {
-      this.$emit("update-navbar", this.name); // Emit event to update the Navbar title
+      this.$emit("update-sidebar", this.name); // Emit event to update the Navbar title
     },
   },
 };
 </script>
+
+
+<template>
+  <li class="nav-item">
+    <router-link :to="path" class="nav-link" @click="updateNavbar">
+      <i class="nav-icon" :class="icon"></i>
+      <p>{{ name }}</p>
+    </router-link>
+  </li>
+</template>
+
 
 <style scoped>
 /* Highlight active menu */

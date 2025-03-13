@@ -1,10 +1,3 @@
-<!-- src/components/Dashboard.vue -->
-<template>
-  <div>
-    <h1>Welcome back, {{ name }}!</h1>
-  </div>
-</template>
-
 <script>
 import { ref, onMounted } from "vue";
 
@@ -29,3 +22,8 @@ h1 {
   color: #333;
 }
 </style>
+  <template>
+    <div>
+      <h1>Welcome back, {{ name }}!</h1>
+    </div>
+  </template>

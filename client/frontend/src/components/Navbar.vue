@@ -1,3 +1,12 @@
+<script>
+export default {
+props: {
+ currentMenu: String,  // Receive dynamic menu name
+ },
+  };
+ </script>
+
+ 
 <template>
   <nav class="main-header navbar navbar-expand navbar-white navbar-light">
     <ul class="navbar-nav">
@@ -11,10 +20,3 @@
   </nav>
 </template>
 
-<script>
-export default {
-  props: {
-    currentMenu: String,  // Receive dynamic menu name
-  },
-};
-</script>

@@ -60,7 +60,7 @@ const login = async () => {
 .login-box {
   background: rgb(176, 185, 199);
   padding: 30px;
-  border-radius: 10px;
+  border-radius: 20px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   text-align: center;
   width: 350px;
@@ -72,7 +72,7 @@ h2 {
 }
 
 .input-group {
-  margin-bottom: 15px;
+  margin-bottom: 25px;
   text-align: left;
 }
 
@@ -100,7 +100,7 @@ button {
   border-radius: 5px;
   font-size: 18px;
   cursor: pointer;
-  transition: background 0.3s;
+
 }
 
 button:hover {

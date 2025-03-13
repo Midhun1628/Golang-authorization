@@ -1,7 +1,8 @@
 <template>
-   <div class="card-body">
-      <button class="btn btn-primary" @click="showAddContact">Add Contact</button>
-    </div>
+  <div class="card-body">
+    <!-- Show Add User button only if role is Super Admin -->
+    <button v-if="userRole === 'SuperAdmin'" class="btn btn-primary" @click="openAddUser">Add User</button>
+  </div>
   <div class="card">
     <div class="card-body">
       <table class="table table-bordered">
@@ -10,7 +11,7 @@
             <th v-for="column in projectColumns" :key="column.field">
               {{ column.title }}
             </th>
-            <th>Actions</th> <!-- New column for Edit/Delete -->
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -20,27 +21,45 @@
             <td>{{ user.email }}</td>
             <td>{{ user.position }}</td>
             <td>
-              <!-- Edit Button -->
-              <button class="btn btn-sm btn-warning" @click="editUser(user.user_id)">
+              <!-- Show Edit & Delete buttons for Super Admin and Admin -->
+              <button
+                v-if="userRole === 'SuperAdmin' || userRole === 'Admin'"
+                class="btn btn-sm btn-warning"
+                @click="openEditUser(user)"
+              >
                 <i class="fas fa-edit"></i>
               </button>
-              <!-- Delete Button -->
-              <button class="btn btn-sm btn-danger" @click="deleteUser(user.user_id)">
+              <button
+                v-if="userRole === 'SuperAdmin' || userRole === 'Admin'"
+                class="btn btn-sm btn-danger"
+                @click="deleteUser(user.user_id)"
+              >
                 <i class="fas fa-trash-alt"></i>
               </button>
             </td>
           </tr>
         </tbody>
       </table>
+      <UserForm
+  v-if="isModalOpen" 
+  :user="selectedUser" 
+  :isEditing="isEditing" 
+  @userUpdated="fetchUsers" 
+  @close="isModalOpen = false"
+/>
     </div>
   </div>
 </template>
 
 <script>
-import axios from "/axios"; // Ensure correct import path
+import UserForm from "./Userform.vue";
+import axios from "/axios";
+
+
 
 export default {
   name: "UserTable",
+  components: { UserForm },
   data() {
     return {
       userData: [],
@@ -50,10 +69,17 @@ export default {
         { title: "EMAIL", field: "email" },
         { title: "Position", field: "position" },
       ],
+      isModalOpen: false,
+      isEditing: false,
+      selectedUser: null,
+      userRole: "", // Store the logged-in user's role
     };
   },
   methods: {
-    async fetchProjects() {
+
+
+
+    async fetchUsers() {
       try {
         const res = await axios.get("/users");
         this.userData = res.data;
@@ -61,33 +87,44 @@ export default {
         console.error("Error fetching users:", error);
       }
     },
-   async editUser(user) {
-      console.log("Editing user:", user);
-      // Implement your edit logic here
+    openAddUser() {
+      this.isEditing = false;
+      this.selectedUser = null;
+      this.isModalOpen = true;
+    },
+    openEditUser(user) {
+      this.isEditing = true;
+      this.selectedUser = { ...user };
+      this.isModalOpen = true;
     },
     async deleteUser(userId) {
       if (confirm("Are you sure you want to delete this user?")) {
         try {
           await axios.delete(`/users/${userId}`);
-          this.fetchProjects(); // Refresh user list after deletion
+          this.fetchUsers();
         } catch (error) {
           console.error("Error deleting user:", error);
         }
       }
     },
+    getUserRole() {
+      // Assuming role is stored in localStorage after login
+      this.userRole = localStorage.getItem("job_title") || ""; 
+    },
   },
   mounted() {
-    this.fetchProjects();
+    this.fetchUsers();
+    this.getUserRole();
   },
 };
-
-
-
 </script>
 
 <style scoped>
+.card-body {
+  margin: 30px;
+}
 .card {
-  margin: 20px;
+  margin: 50px;
 }
 .table {
   width: 100%;

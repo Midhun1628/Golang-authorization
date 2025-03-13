@@ -1,8 +1,9 @@
 <template>
   <div id="app">
-    <Navbar v-if="isLoggedIn" :currentMenu="selectedMenu" />
-    <Sidebar v-if="isLoggedIn" @update-navbar="selectedMenu = $event" />
-    
+    <!-- Navbar and Sidebar appear only when logged in -->
+    <Navbar v-if="isLoggedIn" :currentMenu="selectedSidebar" />
+    <Sidebar v-if="isLoggedIn" @update-navbar="selectedSidebar = $event" />
+
     <main :class="{ 'with-sidebar': isLoggedIn }">
       <router-view></router-view> <!-- Dynamically load the content here -->
     </main>
@@ -25,12 +26,37 @@ export default {
   },
   data() {
     return {
-      selectedMenu: "Dashboard",  // Default menu
+      selectedSidebar: "Dashboard",  // Default menu
+      isLoggedIn: localStorage.getItem("access_token") !== null, // Initial check
     };
   },
-  computed: {
-    isLoggedIn() {
-      return localStorage.getItem("access_token") !== null;
+  methods: {
+    logout() {
+      localStorage.removeItem("access_token"); // Clear token on logout
+      this.isLoggedIn = false; // Update state
+      this.$router.push("/login"); // Redirect to login page
+    },
+  },
+  mounted() {
+    window.addEventListener("storage", this.syncLoginState); // Listen for localStorage changes
+  },
+  beforeUnmount() {
+    window.removeEventListener("storage", this.syncLoginState);
+  },
+  watch: {
+    $route() {
+      // Automatically check login state on route change
+      this.isLoggedIn = localStorage.getItem("access_token") !== null;
+    },
+  },
+  methods: {
+    syncLoginState() {
+      this.isLoggedIn = localStorage.getItem("access_token") !== null;
+    },
+    logout() {
+      localStorage.removeItem("access_token");
+      this.isLoggedIn = false;
+      this.$router.push("/login");
     },
   },
 };
@@ -39,12 +65,12 @@ export default {
 <style>
 /* Default style when sidebar is hidden */
 main {
-  padding: 20px;
+  padding: px;
   margin-left: 0; /* No margin when sidebar is hidden */
 }
 
 /* Apply left margin only when the user is logged in */
 main.with-sidebar {
-  margin-left: 250px; /* Adjust based on sidebar width */
+  margin-left: 230px; /* Adjust based on sidebar width */
 }
 </style>
