@@ -4,7 +4,7 @@ import (
 	"Golang-authorization/config"
 	"Golang-authorization/models"
 	"net/http"
-
+"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -84,17 +84,16 @@ func GetUsers(c *gin.Context) {
 	var userResponses []map[string]interface{}
 	for _, user := range users {
 		userResponses = append(userResponses, map[string]interface{}{
-			"user_id":  user.ID,                      // Rename 'id' to 'user_id'
-			"username": user.Username,
-			"email":    user.Email,
-			"position": user.Role.EmployeePosition,  // Rename 'role' to 'position'
+			"ID":  user.ID,                      // Rename 'id' to 'user_id'
+			"Username": user.Username,
+			"Email":    user.Email,
+			"Position": user.Role.EmployeePosition,  // Rename 'role' to 'position'
 		})
 	}
 
 	// Successfully retrieved users
 	c.JSON(http.StatusOK, userResponses) // Send formatted response
 }
-
 
 func UpdateUser(c *gin.Context) {
 	// Extract user claims from context
@@ -158,6 +157,8 @@ func UpdateUser(c *gin.Context) {
 }
 
 
+
+
 func DeleteUser(c *gin.Context) {
 	// Extract user claims from context
 	claims, exists := c.Get("user")
@@ -184,12 +185,7 @@ func DeleteUser(c *gin.Context) {
 		return
 	}
 
-	// Only allow "SuperAdmin" to delete users
-	if userRole == "Admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Not Authorized for Admin. Only SuperAdmin can delete users."})
-		c.Abort()
-		return
-	}
+
 
 	if userRole == "FrontOffice" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Not Authorized for FrontOffice. Only SuperAdmin can delete users."})

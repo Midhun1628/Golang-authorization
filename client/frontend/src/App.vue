@@ -30,19 +30,8 @@ export default {
       isLoggedIn: localStorage.getItem("access_token") !== null, // Initial check
     };
   },
-  methods: {
-    logout() {
-      localStorage.removeItem("access_token"); // Clear token on logout
-      this.isLoggedIn = false; // Update state
-      this.$router.push("/login"); // Redirect to login page
-    },
-  },
-  mounted() {
-    window.addEventListener("storage", this.syncLoginState); // Listen for localStorage changes
-  },
-  beforeUnmount() {
-    window.removeEventListener("storage", this.syncLoginState);
-  },
+
+ 
   watch: {
     $route() {
       // Automatically check login state on route change
@@ -53,11 +42,7 @@ export default {
     syncLoginState() {
       this.isLoggedIn = localStorage.getItem("access_token") !== null;
     },
-    logout() {
-      localStorage.removeItem("access_token");
-      this.isLoggedIn = false;
-      this.$router.push("/login");
-    },
+   
   },
 };
 </script>

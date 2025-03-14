@@ -3,7 +3,7 @@
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h4 class="modal-title">{{ isEditing ? "Edit User" : "Add User" }}</h4>
+            <h4 class="modal-title">{{ isEditing ? "Change User Data" : "Add a new User" }}</h4>
             <button type="button" class="close" @click="closeModal" aria-label="Close">
              
             </button>
@@ -11,27 +11,29 @@
   
           <div class="modal-body">
             <form @submit.prevent="handleUserSubmit">
-              <div class="form-group">
-                <label for="userId">User ID</label>
-                <input type="text" id="userId" class="form-control" v-model="userData.user_id" :disabled="isEditing" required />
-              </div>
+             
   
               <div class="form-group">
                 <label for="userName">Name</label>
-                <input type="text" id="userName" class="form-control" v-model="userData.username" required />
+                <input type="text" id="userName" class="form-control" v-model="userData.Username" required />
               </div>
   
               <div class="form-group">
                 <label for="userEmail">Email</label>
-                <input type="email" id="userEmail" class="form-control" v-model="userData.email" required />
+                <input type="email" id="userEmail" class="form-control" v-model="userData.Email" required />
+              </div>
+
+              <div class="form-group">
+                <label for="userEmail">Password</label>
+                <input type="password" id="userPassword" class="form-control" v-model="userData.Password" required />
               </div>
   
               <div class="form-group">
                 <label for="userPosition">Position</label>
-                <select id="userPosition" class="form-control" v-model="userData.position" required>
-                  <option value="Super Admin">Super Admin</option>
-                  <option value="Admin">Admin</option>
-                  <option value="Front Office">Front Office</option>
+                <select id="userPosition" class="form-control" v-model.number="userData.RollID" required>
+                  <option value="1">Super Admin</option>
+                  <option value="2">Admin</option>
+                  <option value="3">Front Office</option>
                 </select>
               </div>
             </form>
@@ -59,11 +61,14 @@
     data() {
       return {
         userData: {
-          user_id: "",
-          username: "",
-          email: "",
-          position: "",
+          ID: 0,
+          Username:"",
+          Email:"",
+          EmployeePosition:"",
+          Password:"",
+          RollID:0,
         },
+        
       };
     },
     watch: {
@@ -71,25 +76,30 @@
         immediate: true,
         handler(newUser) {
           if (newUser) {
-            this.userData = { ...newUser };
+             this.userData = {...newUser}
+            console.log("user data is this :",this.userData)
           }
         },
       },
     },
     methods: {
       async handleUserSubmit() {
-        try {
-          if (this.isEditing) {
-            await api.patch(`/users/${this.userData.user_id}`, this.userData);
-          } else {
+    try {
+        
+
+        if (this.isEditing) {
+            await api.put(`/users/${this.userData.ID}`, this.userData); // Ensure ID is sent in the URL
+        } else {
             await api.post("/register", this.userData);
-          }
-          this.$emit("userUpdated");
-          this.closeModal();
-        } catch (error) {
-          console.error("Error saving user:", error);
         }
-      },
+
+        this.$emit("userUpdated");
+        this.closeModal();
+    } catch (error) {
+        console.error("Error saving user:", error);
+    }
+}
+,
       closeModal() {
         this.$emit("close");
       },
@@ -99,7 +109,7 @@
   
   <style >
   .modal {
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.8);
   }
   </style>
   

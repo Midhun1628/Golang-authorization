@@ -11,28 +11,28 @@
             <th v-for="column in projectColumns" :key="column.field">
               {{ column.title }}
             </th>
-            <th>Actions</th>
+            <th v-if="userRole === 'SuperAdmin' || userRole === 'Admin'">Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="user in userData" :key="user.user_id">
-            <td>{{ user.user_id }}</td>
-            <td>{{ user.username }}</td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.position }}</td>
-            <td>
+            <td>{{ user.ID }}</td>
+            <td>{{ user.Username }}</td>
+            <td>{{ user.Email }}</td>
+            <td>{{ user.Position }}</td>
+            <td >
               <!-- Show Edit & Delete buttons for Super Admin and Admin -->
               <button
-                v-if="userRole === 'SuperAdmin' || userRole === 'Admin'"
+              
                 class="btn btn-sm btn-warning"
                 @click="openEditUser(user)"
               >
                 <i class="fas fa-edit"></i>
               </button>
               <button
-                v-if="userRole === 'SuperAdmin' || userRole === 'Admin'"
+                
                 class="btn btn-sm btn-danger"
-                @click="deleteUser(user.user_id)"
+                @click="deleteUser(user.ID)"
               >
                 <i class="fas fa-trash-alt"></i>
               </button>
@@ -64,10 +64,10 @@ export default {
     return {
       userData: [],
       projectColumns: [
-        { title: "ID", field: "user_id" },
-        { title: "USERNAME", field: "username" },
-        { title: "EMAIL", field: "email" },
-        { title: "Position", field: "position" },
+        { title: "ID", field: "ID" },
+        { title: "USERNAME", field: "Username" },
+        { title: "EMAIL", field: "Email" },
+        { title: "Position", field: "EmployeePosition" },
       ],
       isModalOpen: false,
       isEditing: false,
@@ -76,10 +76,7 @@ export default {
     };
   },
   methods: {
-
-
-
-    async fetchUsers() {
+async fetchUsers() {
       try {
         const res = await axios.get("/users");
         this.userData = res.data;

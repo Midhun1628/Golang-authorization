@@ -3,10 +3,11 @@ import { ref } from "vue";
 import api from "/axios"; // Use the new API instance
 import { useRouter } from "vue-router";
 
-const email = ref("john@gmail.com");
-const password = ref("pass");
+const email = ref("mick@gmail.com");
+const password = ref("apple");
 const errorMessage = ref("");
 const router = useRouter();
+
 
 const login = async () => {
   try {
