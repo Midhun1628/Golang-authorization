@@ -4,7 +4,7 @@ import (
 	"Golang-authorization/config"
 	"Golang-authorization/models"
 	"net/http"
-"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -58,12 +58,12 @@ func CreateUser(c *gin.Context) {
 
 	// Create user in the database
 	if err := config.DB.Create(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
 
 	// Send success response
-	c.JSON(http.StatusCreated, gin.H{"message": "User created successfully", "user": user})
+	c.JSON(http.StatusCreated, gin.H{"error": "User created successfully", "user": user})
 }
 
 func GetUsers(c *gin.Context) {
@@ -77,7 +77,7 @@ func GetUsers(c *gin.Context) {
 
 	// If no users are found, return a message instead of an empty array
 	if len(users) == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"message": "No users found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "No users found"})
 		return
 	}
 
@@ -132,14 +132,14 @@ func UpdateUser(c *gin.Context) {
 
 	// Find user by ID
 	if err := config.DB.First(&user, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 
 	// Parse only provided fields from request body
 	var updatedData map[string]interface{}
 	if err := c.ShouldBindJSON(&updatedData); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
 
@@ -148,12 +148,12 @@ func UpdateUser(c *gin.Context) {
 
 	// Perform the actual update in the database
 	if err := config.DB.Model(&user).Updates(updatedData).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
 		return
 	}
 
 	// Send success response after updating the database
-	c.JSON(http.StatusOK, gin.H{"message": "User updated successfully", "user": user})
+	c.JSON(http.StatusOK, gin.H{"error": "User updated successfully", "user": user})
 }
 
 
@@ -198,18 +198,18 @@ func DeleteUser(c *gin.Context) {
 
 	// Check if user exists before deleting
 	if err := config.DB.First(&user, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 
 	// Delete the user
 	if err := config.DB.Delete(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to delete user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
 		return
 	}
 
 	// Send success response
-	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"error": "User deleted successfully"})
 }
 
 

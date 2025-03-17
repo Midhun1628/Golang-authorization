@@ -8,18 +8,26 @@ import Sidebar from "../components/Sidebar.vue";
 
 
 const routes = [
-  { path: "/", component: Login },
- 
+  { path: "/", component: Login ,
+  beforeEnter:(to, from, next) => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      next("/dashboard"); // Redirect to dashboard if logged in
+    } else {
+      next(); // Otherwise, show login page
+    }
+  },
+},
   {
     path: "/dashboard",
-    component: Dashboard,Sidebar,
+    component: Dashboard,
     
     beforeEnter: (to, from, next) => {
       const token = localStorage.getItem("access_token");
       if (!token) {
         next("/");
       } else {
-        next();
+        next();  // stays in the same route which is currently in, (next() when you just want to stay on the current page without forcing a reload.)
       }
     },
   },

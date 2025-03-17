@@ -15,25 +15,43 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Flag to prevent multiple redirects
+let isRefreshing = false;
+
 // Response Interceptor: Handle expired tokens
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return Promise.reject(error); // Prevent multiple refresh attempts
+      }
+      originalRequest._retry = true;
+      isRefreshing = true;
+
       try {
-        // Call refresh token API
+        // Attempt to refresh the token
         const res = await axios.post("http://localhost:3000/refresh", {}, { withCredentials: true });
+
         localStorage.setItem("access_token", res.data.access_token);
 
         // Retry the failed request with new access token
-        error.config.headers["Authorization"] = `Bearer ${res.data.access_token}`;
-        return api.request(error.config);
+        originalRequest.headers["Authorization"] = `Bearer ${res.data.access_token}`;
+        isRefreshing = false; // Reset flag
+        return api.request(originalRequest);
       } catch (refreshError) {
         console.error("Session expired. Please log in again.");
         localStorage.removeItem("access_token");
         localStorage.removeItem("username");
         localStorage.removeItem("job_title");
-        window.location.href = "/login"; // Redirect to login page
+        isRefreshing = false; // Reset flag
+
+        // Redirect only if already on a protected route
+        if (window.location.pathname !== "/") {
+          window.location.href = "/"; // Redirect to login page
+        }
       }
     }
     return Promise.reject(error);

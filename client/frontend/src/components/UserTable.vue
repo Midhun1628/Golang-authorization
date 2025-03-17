@@ -20,7 +20,7 @@
             <td>{{ user.Username }}</td>
             <td>{{ user.Email }}</td>
             <td>{{ user.Position }}</td>
-            <td >
+            <td v-if="userRole === 'SuperAdmin' || userRole === 'Admin'">
               <!-- Show Edit & Delete buttons for Super Admin and Admin -->
               <button
               

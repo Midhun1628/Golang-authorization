@@ -25,7 +25,7 @@ func LoginUser(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Email and password are required"})
 		return
 	}
 
@@ -38,7 +38,7 @@ func LoginUser(c *gin.Context) {
 
 	// Validate password (compare directly as per your request)
 	if user.Password != input.Password {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Incorrect password"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid password"})
 		return
 	}
 
@@ -79,6 +79,7 @@ func RefreshToken(c *gin.Context) {
 
 	if err !=nil{
 		c.JSON(http.StatusUnauthorized,gin.H{"error" : "Invalid refresh token to Validate"})
+		return
 	}
 //extracting user ID
 	userID,ok := claims["user_id"].(float64)
@@ -107,6 +108,7 @@ fmt.Println("refresh token stored :",user.RefreshToken)
 
 	if err!=nil{
 		c.JSON(http.StatusInternalServerError,gin.H{"error":"Could  not generate a new token"})
+		return
 	}
 
 	user.RefreshToken=newRefreshToken
@@ -114,7 +116,7 @@ fmt.Println("refresh token stored :",user.RefreshToken)
 
 	c.SetCookie("refresh_token",newRefreshToken,7*24*60*60,"/","",false ,true)
 
-	c.JSON(http.StatusOK,gin.H {"new Access Token": acesssToken})
+	c.JSON(http.StatusOK,gin.H {"access_token": acesssToken})
 }
 
 

@@ -83,14 +83,19 @@
       },
     },
     methods: {
-      async handleUserSubmit() {
+async handleUserSubmit() {
     try {
-        
+        const payload = {
+            Username: this.userData.Username,
+            Email: this.userData.Email,
+            Password: this.userData.Password,
+            RollID: this.userData.RollID, // Only update RollID, not EmployeePosition
+        };
 
         if (this.isEditing) {
-            await api.put(`/users/${this.userData.ID}`, this.userData); // Ensure ID is sent in the URL
+            await api.put(`/users/${this.userData.ID}`, payload); // Send the correct payload
         } else {
-            await api.post("/register", this.userData);
+            await api.post("/register", payload);
         }
 
         this.$emit("userUpdated");
@@ -99,6 +104,7 @@
         console.error("Error saving user:", error);
     }
 }
+
 ,
       closeModal() {
         this.$emit("close");

@@ -1,29 +1,37 @@
 <script setup>
 import { ref } from "vue";
-import api from "/axios"; // Use the new API instance
+import api from "/axios";
 import { useRouter } from "vue-router";
 
-const email = ref("mick@gmail.com");
-const password = ref("apple");
+const email = ref("midhun@gmail.com");
+const password = ref("web");
 const errorMessage = ref("");
 const router = useRouter();
 
-
 const login = async () => {
+  errorMessage.value = "";
+
   try {
-    const response = await api.post("http://localhost:3000/login", {
+    const response = await api.post("/login", {
       email: email.value,
       password: password.value,
     });
+    if (response.data.access_token) {
 
-    // Store only the access token & user details
-    localStorage.setItem("access_token", response.data.access_token);
-    localStorage.setItem("username", response.data.username);
-    localStorage.setItem("job_title", response.data.job_title);
-
-    router.push("/dashboard"); // Redirect after login
+      // Store access token & user details
+      localStorage.setItem("access_token", response.data.access_token);
+      localStorage.setItem("username", response.data.username);
+      localStorage.setItem("job_title", response.data.job_title);
+      router.push("/dashboard"); // Redirect after successful login
+    }
   } catch (error) {
-    errorMessage.value = error.response?.data?.error || "Login failed";
+    if (error.response) {
+      // Capture API error messages
+      errorMessage.value = error.response.data.error || "Login failed";
+    } else {
+      // Network or unexpected errors
+      errorMessage.value = "An error occurred. Please try again.";
+    }
   }
 };
 </script>
