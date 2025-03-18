@@ -25,7 +25,7 @@ export default {
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column">
           <!-- Dashboard -->
-          <SidebarItem name="Dashboard" icon="fas fa-bars" path="/dashboard" @update-sidebar="updateNavbarText" />
+          <SidebarItem name="Dashboard" icon="fas fa-bars" path="/" @update-sidebar="updateNavbarText" />
 
           <!-- User Table -->
           <SidebarItem name="User Table" icon="fas fa-user" path="/user-table" @update-sidebar="updateNavbarText" />

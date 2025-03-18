@@ -26,7 +26,7 @@ export default {
   },
   data() {
     return {
-      selectedSidebar: "Dashboard",  // Default menu
+      selectedSidebar: "Dashboard",  // Default menu name
       isLoggedIn: localStorage.getItem("access_token") !== null, // Initial check
     };
   },

@@ -9,45 +9,41 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+func CheckPermission(c *gin.Context, userID uint, permissionName string) bool{
+    var user models.User
+    if err := config.DB.Preload("Role.Permissions").First(&user, userID).Error; err != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+        return false
+    }
+
+    for _, permission := range user.Role.Permissions {
+        if permission.Permissions == permissionName {
+            return true
+        }
+    }
+    c.JSON(http.StatusForbidden, gin.H{"error": "Not Authorized"})
+    return false
+}
+
 func CreateUser(c *gin.Context) {
 	// Extract user claims from context
 	claims, exists := c.Get("user")
-
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Token missing or invalid msg from update func"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Token missing or invalid msg from create func"})
 		c.Abort()
 		return
 	}
-
-	// Correct type assertion
-	userClaims, ok := claims.(jwt.MapClaims)
+	userClaims,ok := claims.(jwt.MapClaims)
 	if !ok {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
 		c.Abort()
 		return
 	}
+	userID := uint(userClaims["user_id"].(float64))
 
-	// Get user role from token
-	userRole, ok := userClaims["role"].(string)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid role in token"})
-		c.Abort()
-		return
+	if !CheckPermission(c, userID, "Create") {
+        return
 	}
-
-	// Only allow "SuperAdmin" to create users
-	if userRole == "Admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Not Authorized for Admin. Only SuperAdmin can create users."})
-		c.Abort()
-		return
-	}
-
-	if userRole == "FrontOffice" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Not Authorized for FrontOffice. Only SuperAdmin can create users."})
-		c.Abort()
-		return
-	}
-
 	var user models.User
 
 	// Bind JSON request body to the user struct
@@ -113,19 +109,13 @@ func UpdateUser(c *gin.Context) {
 	}
 
 	// Get user role from token
-	userRole, ok := userClaims["role"].(string)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid role in token"})
-		c.Abort()
-		return
-	}
+	userID:= uint(userClaims["user_id"].(float64))
+	
 
-	// Only allow "Super Admin" and "Admin" to update users
-	if userRole != "SuperAdmin" && userRole != "Admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Not Authorized for Front Office"})
-		c.Abort()
-		return
-	}
+	if !CheckPermission(c, userID, "Update") {
+        return
+    }
+
 
 	var user models.User
 	id := c.Param("id")
@@ -153,11 +143,8 @@ func UpdateUser(c *gin.Context) {
 	}
 
 	// Send success response after updating the database
-	c.JSON(http.StatusOK, gin.H{"error": "User updated successfully", "user": user})
+	c.JSON(http.StatusOK, gin.H{"Message": "User updated successfully", "user": user})
 }
-
-
-
 
 func DeleteUser(c *gin.Context) {
 	// Extract user claims from context
@@ -178,18 +165,9 @@ func DeleteUser(c *gin.Context) {
 	}
 
 	// Get user role from token
-	userRole, ok := userClaims["role"].(string)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid role in token"})
-		c.Abort()
-		return
-	}
-
-
-
-	if userRole == "FrontOffice" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Not Authorized for FrontOffice. Only SuperAdmin can delete users."})
-		c.Abort()
+	userID := uint (userClaims["user_id"].(float64))
+	
+	if !CheckPermission(c,userID,"Delete"){
 		return
 	}
 
@@ -209,7 +187,7 @@ func DeleteUser(c *gin.Context) {
 	}
 
 	// Send success response
-	c.JSON(http.StatusOK, gin.H{"error": "User deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"Message": "User deleted successfully"})
 }
 
 

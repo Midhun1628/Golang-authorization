@@ -8,6 +8,7 @@ const password = ref("web");
 const errorMessage = ref("");
 const router = useRouter();
 
+
 const login = async () => {
   errorMessage.value = "";
 
@@ -22,7 +23,7 @@ const login = async () => {
       localStorage.setItem("access_token", response.data.access_token);
       localStorage.setItem("username", response.data.username);
       localStorage.setItem("job_title", response.data.job_title);
-      router.push("/dashboard"); // Redirect after successful login
+      router.push("/"); // Redirect after successful login
     }
   } catch (error) {
     if (error.response) {

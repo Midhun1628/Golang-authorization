@@ -23,17 +23,18 @@
                 <input type="email" id="userEmail" class="form-control" v-model="userData.Email" required />
               </div>
 
-              <div class="form-group">
+              <div v-if="!isEditing" class="form-group" >
                 <label for="userEmail">Password</label>
-                <input type="password" id="userPassword" class="form-control" v-model="userData.Password" required />
+                <input type="password" id="userPassword" class="form-control" v-model="userData.Password" :required="!isEditing" :disabled="isEditing" />
               </div>
   
               <div class="form-group">
-                <label for="userPosition">Position</label>
-                <select id="userPosition" class="form-control" v-model.number="userData.RollID" required>
-                  <option value="1">Super Admin</option>
-                  <option value="2">Admin</option>
-                  <option value="3">Front Office</option>
+                <label for="EmployeePosition">Position</label>
+                <select id="EmployeePosition" class="form-control" v-model.number="userData.RollID" required>
+                  <option value="0" disabled>Select Position</option>
+                  <option :value="1" >Super Admin</option>
+                  <option :value="2">Admin</option>
+                  <option :value="3">Front Office</option>
                 </select>
               </div>
             </form>
@@ -72,20 +73,25 @@
       };
     },
     watch: {
-      user: {
-        immediate: true,
-        handler(newUser) {
-          if (newUser) {
-             this.userData = {...newUser}
-            console.log("user data is this :",this.userData)
-          }
-        },
-      },
+  user: {
+    immediate: true,
+    handler(newUser) {
+      if (newUser) {
+        this.userData = { ...newUser };
+
+        // Ensure RollID is always a number
+        this.userData.RollID = Number(newUser.RollID) || 0;
+
+
+      }
     },
+  },
+},
+
     methods: {
-async handleUserSubmit() {
+      async handleUserSubmit() {
     try {
-        const payload = {
+      const payload = {
             Username: this.userData.Username,
             Email: this.userData.Email,
             Password: this.userData.Password,
@@ -93,7 +99,7 @@ async handleUserSubmit() {
         };
 
         if (this.isEditing) {
-            await api.put(`/users/${this.userData.ID}`, payload); // Send the correct payload
+            await api.put(`/users/${this.userData.ID}`, payload); // Ensure ID is sent in the URL
         } else {
             await api.post("/register", payload);
         }
@@ -104,7 +110,6 @@ async handleUserSubmit() {
         console.error("Error saving user:", error);
     }
 }
-
 ,
       closeModal() {
         this.$emit("close");
@@ -117,5 +122,11 @@ async handleUserSubmit() {
   .modal {
     background: rgba(0, 0, 0, 0.8);
   }
+
+  .disabled-field {
+  opacity: 0.6; /* Make it look disabled */
+  pointer-events: none; /* Prevent interaction */
+}
+
   </style>
   

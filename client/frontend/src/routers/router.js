@@ -4,28 +4,27 @@ import { createRouter, createWebHistory } from "vue-router";
 import Login from "../components/Login.vue";
 import Dashboard from "../components/Dashboard.vue";
 import UserTable from "../components/UserTable.vue";
-import Sidebar from "../components/Sidebar.vue";
 
 
 const routes = [
-  { path: "/", component: Login ,
+  { path: "/login", component: Login ,
   beforeEnter:(to, from, next) => {
     const token = localStorage.getItem("access_token");
     if (token) {
-      next("/dashboard"); // Redirect to dashboard if logged in
+      next("/"); // Redirect to dashboard if logged in
     } else {
       next(); // Otherwise, show login page
     }
   },
 },
   {
-    path: "/dashboard",
+    path: "/",
     component: Dashboard,
     
     beforeEnter: (to, from, next) => {
       const token = localStorage.getItem("access_token");
       if (!token) {
-        next("/");
+        next("/login");
       } else {
         next();  // stays in the same route which is currently in, (next() when you just want to stay on the current page without forcing a reload.)
       }
@@ -35,14 +34,20 @@ const routes = [
     path: "/user-table",
     name: "UserTable",
     component: UserTable,
+    beforeEnter: (to, from, next) => {
+      let token = localStorage.getItem("access_token");
+
+      if (!token) {
+        next("/login");// Redirect to login page
+      } else {
+        next()
+      }},
   },{
     path: "/logout",
     name: "Logout",
     beforeEnter: (to, from, next) => {
       localStorage.clear()    // Clear token on logout
-     
-   
-      next("/"); // Redirect to login page
+      next("/login"); // Redirect to login page
     },
   },
 ];
