@@ -11,13 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type LoginResponse struct {
-	Username     string `json:"username"`
-	AccessToken  string `json:"access_token"`
-	JobTitle     string `json:"job_title"`
-	RefreshToken string `json:"refresh_token"`
-}
-
 func LoginUser(c *gin.Context) {
 	var input struct {
 		Email    string `json:"email" binding:"required"`
@@ -29,17 +22,23 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	// Find user by email
+	// Find user by email and preload Role & Permissions
 	var user models.User
-	if err := config.DB.Preload("Role").Where("email = ?", input.Email).First(&user).Error; err != nil {
+	if err := config.DB.Preload("Role.Permissions").Where("email = ?", input.Email).First(&user).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email ID"})
 		return
 	}
 
-	// Validate password (compare directly as per your request)
+	// Validate password (direct comparison as per your request)
 	if user.Password != input.Password {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid password"})
 		return
+	}
+
+	// Extract permissions from user's role
+	var permissions []string
+	for _, perm := range user.Role.Permissions {
+		permissions = append(permissions, perm.Permissions)
 	}
 
 	// Generate JWT Tokens
@@ -51,19 +50,19 @@ func LoginUser(c *gin.Context) {
 
 	// Save Refresh Token in DB
 	user.RefreshToken = refreshToken
-	config.DB.Save(&user)
+	
 
 	// Set Refresh Token as HttpOnly Cookie (secure, not accessible by JavaScript)
 	c.SetCookie("refresh_token", refreshToken, 7*24*60*60, "/", "", false, true)
 
-	// Send JSON response to frontend with only necessary data
+	// Send JSON response to frontend with role & permissions
 	c.JSON(http.StatusOK, gin.H{
 		"username":     user.Username,
-		"access_token": accessToken, // Store only this in localStorage
+		"access_token": accessToken, 
 		"job_title":    user.Role.EmployeePosition,
+		"permissions":  permissions, // Send permissions list
 	})
 }
-
 
 
 func RefreshToken(c *gin.Context) {

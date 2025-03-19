@@ -12,13 +12,13 @@ func SetupRoutes(router *gin.Engine) {
 	router.POST("/login", controllers.LoginUser)
 	router.POST("/refresh",controllers.RefreshToken)
 	
-	protected := router.Group("/")
-	protected.Use(middleware.AuthMiddleware())
+	auth := router.Group("/")
+	auth.Use(middleware.AuthMiddleware()) // Protect all routes with authentication
+
 	{
-		    protected.POST("/register", controllers.CreateUser)
-			protected.GET("/users", controllers.GetUsers)
-			protected.PUT("/users/:id", controllers.UpdateUser)
-			protected.DELETE("/users/:id", controllers.DeleteUser)
+		auth.POST("/users", middleware.PermissionMiddleware("Create"), controllers.CreateUser)
+		auth.GET("/users", middleware.PermissionMiddleware("Read"), controllers.GetUsers)
+		auth.PUT("/users/:id", middleware.PermissionMiddleware("Update"), controllers.UpdateUser)
+		auth.DELETE("/users/:id", middleware.PermissionMiddleware("Delete"), controllers.DeleteUser)
 	}
-	
 }

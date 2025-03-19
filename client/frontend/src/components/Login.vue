@@ -23,6 +23,7 @@ const login = async () => {
       localStorage.setItem("access_token", response.data.access_token);
       localStorage.setItem("username", response.data.username);
       localStorage.setItem("job_title", response.data.job_title);
+      localStorage.setItem("permissions", JSON.stringify(response.data.permissions));  
       router.push("/"); // Redirect after successful login
     }
   } catch (error) {
