@@ -43,9 +43,8 @@ api.interceptors.response.use(
         return api.request(originalRequest);
       } catch (refreshError) {
         console.error("Session expired. Please log in again.");
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("username");
-        localStorage.removeItem("job_title");
+        localStorage.clear()
+       
         isRefreshing = false; // Reset flag
 
         // Redirect only if already on a protected route

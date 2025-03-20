@@ -31,11 +31,12 @@
               <div class="form-group">
                 <label for="EmployeePosition">Position</label>
                 <select id="EmployeePosition" class="form-control" v-model.number="userData.RollID" required>
-                  <option value="0" disabled>Select Position</option>
-                  <option :value="1" >Super Admin</option>
-                  <option :value="2">Admin</option>
-                  <option :value="3">Front Office</option>
-                </select>
+  <option value="0" disabled>Select Position</option>
+  <option v-for="role in roles" :key="role.ID" :value="role.ID">
+    {{ role.EmployeePosition }}
+  </option>
+</select>
+
               </div>
             </form>
           </div>
@@ -62,13 +63,14 @@
     data() {
       return {
         userData: {
-          ID: 0,
+          ID:0,
           Username:"",
           Email:"",
           EmployeePosition:"",
           Password:"",
           RollID:0,
         },
+        roles:[],
         
       };
     },
@@ -98,6 +100,8 @@
             RollID: this.userData.RollID, // Only update RollID, not EmployeePosition
         };
 
+        console.log(this.userData.Email);
+
         if (this.isEditing) {
             await api.put(`/users/${this.userData.ID}`, payload); // Ensure ID is sent in the URL
         } else {
@@ -109,12 +113,25 @@
     } catch (error) {
         console.error("Error saving user:", error);
     }
+},
+async fetchRoles() {
+  try{
+    const res=await api.get("/roles");
+    this.roles=res.data;
+    console.log(res);
+    
+  }catch(error){
+    console.error("Error fetching roles:", error);
+  }
 }
 ,
       closeModal() {
         this.$emit("close");
       },
     },
+    mounted(){
+      this.fetchRoles()
+    }
   };
   </script>
   

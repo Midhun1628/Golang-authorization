@@ -11,6 +11,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func GetRoles(c *gin.Context) {
+	var roles []models.Role
+
+	// Fetch roles from the database
+	if err := config.DB.Find(&roles).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch roles", "details": err.Error()})
+		return
+	}
+
+	// Return roles
+	c.JSON(http.StatusOK, roles)
+	fmt.Println("Roles fetched datas are:", roles)
+}
+
+
 func LoginUser(c *gin.Context) {
 	var input struct {
 		Email    string `json:"email" binding:"required"`
@@ -49,11 +64,16 @@ func LoginUser(c *gin.Context) {
 	}
 
 	// Save Refresh Token in DB
-	user.RefreshToken = refreshToken
-	
-
 	// Set Refresh Token as HttpOnly Cookie (secure, not accessible by JavaScript)
+
 	c.SetCookie("refresh_token", refreshToken, 7*24*60*60, "/", "", false, true)
+	
+	
+	
+	config.DB.Model(&models.User{}).Where("id = ?", user.ID).UpdateColumn("refresh_token", refreshToken)
+
+	fmt.Println("Refresh token in database:", user.RefreshToken)
+	//save the added refresh token to database
 
 	// Send JSON response to frontend with role & permissions
 	c.JSON(http.StatusOK, gin.H{
@@ -99,7 +119,7 @@ func RefreshToken(c *gin.Context) {
 fmt.Println("refresh token stored :",user.RefreshToken)
 	// Check if the refresh token matches the stored token
 	if user.RefreshToken != refreshToken {
-		c.JSON(http.StatusUnauthorized, gin.H{"stored token":user.RefreshToken})
+		c.JSON(http.StatusUnauthorized, gin.H{"stored refresh token":user.RefreshToken ,"refresh token":refreshToken})
 		return
 	}
 
@@ -117,12 +137,3 @@ fmt.Println("refresh token stored :",user.RefreshToken)
 
 	c.JSON(http.StatusOK,gin.H {"access_token": acesssToken})
 }
-
-
-// func getRoleName(roleID uint) string {
-// 	var role models.Role
-// 	if err := config.DB.Where("roll_no = ?", roleID).First(&role).Error; err != nil {
-// 		return "Unknown"
-// 	}
-// 	return role.EmployeePosition
-// }

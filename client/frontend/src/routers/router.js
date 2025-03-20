@@ -46,7 +46,8 @@ const routes = [
     path: "/logout",
     name: "Logout",
     beforeEnter: (to, from, next) => {
-      localStorage.clear()    // Clear token on logout
+      localStorage.clear() 
+      
       next("/login"); // Redirect to login page
     },
   },

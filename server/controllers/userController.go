@@ -88,6 +88,7 @@ func GetUsers(c *gin.Context) {
 			"Username": user.Username,
 			"Email":    user.Email,
 			"Position": user.Role.EmployeePosition,  // Rename 'role' to 'position'
+			"RollID" :  user.RollID,
 		})
 	}
 

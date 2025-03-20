@@ -73,6 +73,7 @@ export default {
       try {
         const res = await axios.get("/users");
         this.userData = res.data;
+        
       } catch (error) {
         console.error("Error fetching users:", error);
       }

@@ -4,7 +4,7 @@ import (
 	"Golang-authorization/config"
 	"Golang-authorization/models"
 	"Golang-authorization/utils"
-	"fmt"
+	
 	"net/http"
 	"strings"
 	"github.com/golang-jwt/jwt/v5"
@@ -22,7 +22,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		// Extract Bearer token
 		parts := strings.Split(tokenHeader," ")
-fmt.Println("parts from authMiddleware:", parts)
+
 
 		if len(parts) != 2 || parts[0] != "Bearer" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format msg from authMiddleware"})
@@ -31,7 +31,7 @@ fmt.Println("parts from authMiddleware:", parts)
 		}
 
 		tokenString := parts[1]
-		fmt.Println("Token received:", tokenString) // Debugging
+		// fmt.Println("Token received:", tokenString) // Debugging
 
 		claims, err := utils.ValidateJWT(tokenString)
 		if err != nil {
